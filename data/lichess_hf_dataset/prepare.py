@@ -1,25 +1,47 @@
+# saves the openwebtext dataset to a binary file for training. following was helpful:
+# https://github.com/HazyResearch/flash-attention/blob/main/training/src/datamodules/language_modeling_hf.py
+
 import os
 from tqdm import tqdm
 import numpy as np
 import tiktoken
-from datasets import load_dataset
+from datasets import load_dataset  # huggingface datasets
 import pickle
 
+# number of workers in .map() call
+# good number to use is ~order number of cpu cores // 2
 num_proc = 8
+# Currently there are only 32 tokens in the chess LLMs vocab
 dtype = np.uint8
 
 if __name__ == "__main__":
+    # dataset = load_dataset("csv", data_files={"train": "pgn.csv"}) # For local testing
     dataset_path = "adamkarvonen/chess_games"
     file_path = "lichess_6gb_blocks.zip"
+    # file_path = "smaller_pgn_file_blocks.zip"
 
     print("Loading dataset...")
     dataset = load_dataset(dataset_path, data_files=file_path)
 
     print("Creating train/val split...")
+    # by default only contains the 'train' split, so create a test split
     split_dataset = dataset["train"].train_test_split(
         test_size=0.01, seed=2357, shuffle=True
     )
-    split_dataset["val"] = split_dataset.pop("test")
+    split_dataset["val"] = split_dataset.pop("test")  # rename the test split to val
+
+    # this results in:
+    # >>> split_dataset
+    # DatasetDict({
+    #     train: Dataset({
+    #         features: ['text'],
+    #         num_rows: 8009762
+    #     })
+    #     val: Dataset({
+    #         features: ['text'],
+    #         num_rows: 4007
+    #     })
+    # })
 
     meta_path = os.path.join(os.path.dirname(__file__), "meta.pkl")
     with open(meta_path, "rb") as f:
@@ -27,6 +49,18 @@ if __name__ == "__main__":
 
     stoi = meta["stoi"]
     itos = meta["itos"]
+
+    # to read the bin files later, e.g. with numpy:
+    # m = np.memmap('train.bin', dtype=np.uint8, mode='r')
+
+    # For verifying that all games are 1024 tokens long
+    # for game in split_dataset["train"]["transcript"]:
+    #     if len(game) != 1024:
+    #         print(len(game))
+    #         print(game)
+    #         break
+    # print(stoi)
+
     column_name = "transcript"
 
     def process(example):
