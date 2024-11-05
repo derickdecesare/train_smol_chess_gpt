@@ -92,7 +92,8 @@ if __name__ == "__main__":
         filename = os.path.join(os.path.dirname(__file__), f"{split}.bin")
         arr = np.memmap(filename, dtype=dtype, mode="w+", shape=(arr_len,))
         print(arr.shape)
-        total_batches = 1024
+        total_batches = 2048  # Increased number of batches for smaller memory footprint
+        batch_size = len(dset) // total_batches + 1
 
         idx = 0
         for batch_idx in tqdm(range(total_batches), desc=f"writing {filename}"):
