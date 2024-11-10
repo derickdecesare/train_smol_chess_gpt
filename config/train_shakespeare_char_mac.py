@@ -1,6 +1,12 @@
 # train a miniature character-level shakespeare model
 # good for debugging and playing on macbooks and such
 
+# Proposed mini-chess-gpt config
+# n_layer = 8
+# n_head = 4
+# n_embd = 256
+# batch_size = 2
+
 out_dir = 'out-shakespeare-char'
 eval_interval = 500 # keep frequent because we'll overfit
 eval_iters = 100
