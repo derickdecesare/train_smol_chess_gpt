@@ -114,3 +114,16 @@ bash
 - For Mac, ensure device='mps' and compile=False
 - Verify meta.pkl exists before training
 - Check train.bin and val.bin were created properly
+
+## Last Model Trained
+
+embeddings = 8,192 + 261,888
+per_block = 524,800
+all_blocks = per_block \* n_layer
+final_layers = 256 + 8,192
+
+total_params = embeddings + all_blocks + final_layers
+
+# = 270,080 + (524,800 \* 8) + 8,448
+
+# = 4,476,928 ≈ 4.5M parameters
